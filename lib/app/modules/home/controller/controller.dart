@@ -46,8 +46,8 @@ class HomeController extends GetxController with StateMixin<CharacterModel?> {
 
   Future<void> initSharedPreferences() async {
     prefs = await SharedPreferences.getInstance();
-    await getCharacters(); // Ensure characters are loaded
-    loadFavorites(); // Then load favorites
+    await getCharacters();
+    loadFavorites();
   }
 
   Future<void> getCharacters({bool isPagination = false}) async {
@@ -55,8 +55,7 @@ class HomeController extends GetxController with StateMixin<CharacterModel?> {
       change(null, status: RxStatus.loading());
     }
     try {
-      final char = await characterProvider.getCharacters(
-          page: currentPage); // Pass current page
+      final char = await characterProvider.getCharacters(page: currentPage);
 
       if (char != null && char.results!.isNotEmpty) {
         if (isPagination) {
@@ -93,8 +92,6 @@ class HomeController extends GetxController with StateMixin<CharacterModel?> {
         selectedStatus.value.isNotEmpty ||
         selectedSpecies.value.isNotEmpty;
 
-    debugPrint("Filtering state: ${isFiltering.value}");
-
     String query = searchController.text.toLowerCase();
     String status = selectedStatus.value;
     String species = selectedSpecies.value;
@@ -106,8 +103,6 @@ class HomeController extends GetxController with StateMixin<CharacterModel?> {
       bool matchesSpecies = species.isEmpty || character.species == species;
       return matchesName! && matchesStatus && matchesSpecies;
     }).toList();
-
-    debugPrint("Filtered characters count: ${filteredCharacters.length}");
   }
 
   void toggleFavorite(Results character) {

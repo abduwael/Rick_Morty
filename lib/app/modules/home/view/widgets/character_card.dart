@@ -8,11 +8,11 @@ class CharacterCard extends StatelessWidget {
   final bool isFavorite;
 
   const CharacterCard({
-    Key? key,
+    super.key,
     required this.character,
     required this.onFavoriteToggle,
     this.isFavorite = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
