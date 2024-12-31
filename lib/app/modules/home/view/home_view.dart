@@ -105,13 +105,17 @@ class HomeView extends GetView<HomeController> {
                           itemCount: controller.filteredCharacters.length + 1,
                           itemBuilder: (context, index) {
                             if (index == controller.filteredCharacters.length) {
-                              // Loader or "No More Data" at the bottom
-                              return controller.hasMorePages.value
-                                  ? const Center(
-                                      child: CircularProgressIndicator())
-                                  : const Center(
-                                      child: Text('No more characters.'));
+                              debugPrint(
+                                  'isFiltering: ${controller.isFiltering.value}');
+                              return controller.isFiltering.value
+                                  ? const SizedBox() // No loader during filtering
+                                  : controller.hasMorePages.value
+                                      ? const Center(
+                                          child: CircularProgressIndicator())
+                                      : const Center(
+                                          child: Text('No more characters.'));
                             }
+
                             final character =
                                 controller.filteredCharacters[index];
 

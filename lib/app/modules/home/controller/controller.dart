@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../data/models/character_model.dart';
@@ -23,9 +20,8 @@ class HomeController extends GetxController with StateMixin<CharacterModel?> {
   RxBool isLoadingMore = false.obs;
   RxBool hasMorePages = true.obs;
   ScrollController scrollController = ScrollController();
+  RxBool isFiltering = false.obs;
 
-  final PagingController<int, Results> pagingController =
-      PagingController(firstPageKey: 1);
   @override
   void onInit() {
     super.onInit();
@@ -34,14 +30,17 @@ class HomeController extends GetxController with StateMixin<CharacterModel?> {
   }
 
   void scrollAndLoadMore() {
-    scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-              scrollController.position.maxScrollExtent &&
-          !isLoadingMore.value &&
-          hasMorePages.value) {
-        isLoadingMore.value = true;
-        getCharacters(isPagination: true);
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scrollController.addListener(() {
+        if (scrollController.position.pixels ==
+                scrollController.position.maxScrollExtent &&
+            !isLoadingMore.value &&
+            !isFiltering.value &&
+            hasMorePages.value) {
+          isLoadingMore.value = true;
+          getCharacters(isPagination: true);
+        }
+      });
     });
   }
 
@@ -53,60 +52,62 @@ class HomeController extends GetxController with StateMixin<CharacterModel?> {
 
   Future<void> getCharacters({bool isPagination = false}) async {
     if (!isPagination) {
-      change(null,
-          status: RxStatus.loading()); // Keep existing logic for non-pagination
+      change(null, status: RxStatus.loading());
     }
-
     try {
       final char = await characterProvider.getCharacters(
           page: currentPage); // Pass current page
 
       if (char != null && char.results!.isNotEmpty) {
         if (isPagination) {
-          // Append new data for pagination
           allCharacters.addAll(char.results!);
         } else {
-          // Initial load logic
           allCharacters.value = char.results!;
           filteredCharacters.value = allCharacters;
           change(char, status: RxStatus.success());
         }
 
-        // Check if more pages exist
         if (char.info?.next == null) {
           hasMorePages.value = false;
         } else {
-          currentPage++; // Increment page for the next request
+          currentPage++;
         }
       } else {
         if (!isPagination) {
-          change(null,
-              status: RxStatus.empty()); // Keep existing empty data logic
+          change(null, status: RxStatus.empty());
         }
-        hasMorePages.value = false; // No more pages to load
+        hasMorePages.value = false;
       }
     } catch (e) {
       if (!isPagination) {
-        change(null,
-            status: RxStatus.error(
-                e.toString())); // Preserve error handling for non-pagination
+        change(null, status: RxStatus.error(e.toString()));
       }
     } finally {
-      isLoadingMore.value = false; // Reset loading state
+      isLoadingMore.value = false;
     }
   }
 
   void filterCharacters() {
+    // Check if any filter has a value
+    isFiltering.value = searchController.text.isNotEmpty ||
+        selectedStatus.value.isNotEmpty ||
+        selectedSpecies.value.isNotEmpty;
+
+    debugPrint("Filtering state: ${isFiltering.value}");
+
     String query = searchController.text.toLowerCase();
     String status = selectedStatus.value;
     String species = selectedSpecies.value;
 
+    // Apply filters on the local dataset
     filteredCharacters.value = allCharacters.where((character) {
       bool? matchesName = character.name?.toLowerCase().contains(query);
       bool matchesStatus = status.isEmpty || character.status == status;
       bool matchesSpecies = species.isEmpty || character.species == species;
       return matchesName! && matchesStatus && matchesSpecies;
     }).toList();
+
+    debugPrint("Filtered characters count: ${filteredCharacters.length}");
   }
 
   void toggleFavorite(Results character) {

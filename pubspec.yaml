@@ -38,7 +38,6 @@ dependencies:
   get: 4.6.6
   gap: ^3.0.1
   shared_preferences: ^2.3.1
-  infinite_scroll_pagination: ^4.1.0
 
 dev_dependencies:
   flutter_test:

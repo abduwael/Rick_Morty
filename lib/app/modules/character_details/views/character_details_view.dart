@@ -43,19 +43,19 @@ class CharacterDetailsView extends GetView<CharacterDetailsController> {
                   Text('Type: ${character.type}'),
                 const SizedBox(height: 16),
                 // Origin Location
-                Text(
+                const Text(
                   'Origin Location:',
                 ),
                 Text(character.origin?.name ?? 'Unknown'),
                 const SizedBox(height: 8),
                 // Current Location
-                Text(
+                const Text(
                   'Current Location:',
                 ),
                 Text(character.location?.name ?? 'Unknown'),
                 const SizedBox(height: 16),
                 // Episodes
-                Text(
+                const Text(
                   'Episodes:',
                 ),
                 const SizedBox(height: 8),
