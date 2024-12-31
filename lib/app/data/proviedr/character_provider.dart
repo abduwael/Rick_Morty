@@ -24,16 +24,14 @@ class CharacterProvider extends GetConnect {
           );
         }
         if (result.isOk) {
-          debugPrint("Character Details: ${result.body}");
           return CharacterModel.fromJson(result.body);
         } else {
           retryCount++;
-          debugPrint("Request failed. Retrying... Attempt: $retryCount");
         }
       } catch (e) {
         retryCount++;
-        debugPrint("Error occurred: $e. Retrying... Attempt: $retryCount");
       }
     }
+    return null;
   }
 }
